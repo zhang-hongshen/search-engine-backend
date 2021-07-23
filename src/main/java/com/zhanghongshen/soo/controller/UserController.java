@@ -1,13 +1,12 @@
 package com.zhanghongshen.soo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.zhanghongshen.soo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -20,12 +19,14 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
-    @RequestMapping(value = "/login",method = RequestMethod.GET)
-    public JSONObject login(@RequestParam Map<String,String> params) {
+
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public ResultBean login(@RequestBody LinkedHashMap<String,String> params) {
         String username = params.get("username");
         String password = params.get("password");
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("success",userService.check(username,password));
-        return jsonObject;
+        System.out.println(params);
+        ResultBean resultBean = new ResultBean();
+        resultBean.setCode(userService.check(username,password) ? ResultBean.SUCCESS : ResultBean.FAIL);
+        return resultBean;
     }
 }

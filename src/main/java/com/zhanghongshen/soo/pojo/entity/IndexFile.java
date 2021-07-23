@@ -1,20 +1,17 @@
-package com.zhanghongshen.soo.entity;
+package com.zhanghongshen.soo.pojo.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
  * @author Zhang Hongshen
  * @date 2021/5/27
  */
-@Entity
 @Data
-@Table(name = "index_file")
+@TableName("index_file")
 public class IndexFile {
-    @Id
+    @TableId(value = "filepath")
     private String filepath;
 
     public IndexFile() {
@@ -23,5 +20,4 @@ public class IndexFile {
     public IndexFile(String filepath) {
         this.filepath = filepath;
     }
-
 }

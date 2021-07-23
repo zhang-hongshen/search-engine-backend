@@ -1,5 +1,7 @@
 package com.zhanghongshen.soo.service;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.zhanghongshen.soo.pojo.entity.Page;
 import com.zhanghongshen.soo.utils.FileUtils;
 import com.zhanghongshen.soo.core.TextProcessor;
 import com.zhanghongshen.soo.dao.PageDao;
@@ -24,7 +26,10 @@ public class TextProcessorService {
 
     public void process(File originalFile, File targetFile, String language){
         processor.process(originalFile,targetFile,language);
-        pageDao.updateByFilePath(targetFile.getAbsolutePath(),originalFile.getAbsolutePath());
+        UpdateWrapper<Page> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("local_filepath",originalFile.getAbsolutePath())
+                .set("processed_filepath",targetFile.getAbsolutePath());
+        pageDao.update(null,updateWrapper);
     }
 
     public void processAll(File originalFile, File targetFile, String language){

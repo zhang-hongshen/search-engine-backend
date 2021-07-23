@@ -12,6 +12,6 @@ class PageServiceTest {
 
     @Test
     void query() {
-        System.out.println(pageService.query("百度"));
+        System.out.println(pageService.query("百度",1,10));
     }
 }

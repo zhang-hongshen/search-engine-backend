@@ -1,12 +1,13 @@
 package com.zhanghongshen.soo.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.huaban.analysis.jieba.JiebaSegmenter.SegMode;
 import com.zhanghongshen.soo.utils.FileUtils;
 import com.zhanghongshen.soo.core.jiebaforlucene.JiebaAnalyzer;
 import com.zhanghongshen.soo.dao.IndexFileDao;
 import com.zhanghongshen.soo.dao.PageDao;
-import com.zhanghongshen.soo.entity.IndexFile;
-import com.zhanghongshen.soo.entity.Page;
+import com.zhanghongshen.soo.pojo.entity.IndexFile;
+import com.zhanghongshen.soo.pojo.entity.Page;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -52,7 +53,9 @@ public class IndexFileService {
             IndexWriter indexWriter = new IndexWriter(directory,config);
             for(File file : Objects.requireNonNull(originalFile.listFiles())){
                 String filePath = file.getCanonicalPath();
-                Page page = pageDao.findByProcessedFilePath(filePath);
+                QueryWrapper<Page> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("processed_filepath",filePath);
+                Page page = pageDao.selectOne(queryWrapper);
                 Document doc = new Document();
                 String fileContent = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
                 doc.add(new TextField("title",page.getTitle(), Store.YES));
@@ -64,9 +67,10 @@ public class IndexFileService {
             }
             indexWriter.close();
             analyzer.close();
-            indexFileDao.save(new IndexFile(indexFile.getCanonicalPath()));
+            indexFileDao.insert(new IndexFile(indexFile.getCanonicalPath()));
         }catch (IOException e){
             e.printStackTrace();
         }
     }
+
 }

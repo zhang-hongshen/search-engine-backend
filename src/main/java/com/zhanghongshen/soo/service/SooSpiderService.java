@@ -3,7 +3,7 @@ package com.zhanghongshen.soo.service;
 import com.zhanghongshen.soo.utils.FileUtils;
 import com.zhanghongshen.soo.core.UserAgent;
 import com.zhanghongshen.soo.dao.PageDao;
-import com.zhanghongshen.soo.entity.Page;
+import com.zhanghongshen.soo.pojo.entity.Page;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -64,7 +64,7 @@ public class SooSpiderService {
                     String keywords = doc.head().select("meta[name=keywords]").attr("content");
                     String filePath = FileUtils.randomFileName(file,".html");
                     //写入page表
-                    pageDao.save(new Page(url,title,description,keywords,filePath));
+                    pageDao.insert(new Page(url,title,description,keywords,filePath));
                     //保存为本地文件
                     FileUtils.writeStringToFile(new File(filePath),content, StandardCharsets.UTF_8);
                     //抓取a标签的href属性值

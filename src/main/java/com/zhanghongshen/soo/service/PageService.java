@@ -1,11 +1,12 @@
 package com.zhanghongshen.soo.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zhanghongshen.soo.core.Querier;
 import com.zhanghongshen.soo.dao.IndexFileDao;
-import com.zhanghongshen.soo.entity.IndexFile;
-import com.zhanghongshen.soo.entity.Page;
 import com.zhanghongshen.soo.dao.PageDao;
+import com.zhanghongshen.soo.pojo.entity.IndexFile;
+import com.zhanghongshen.soo.pojo.entity.Page;
 import org.apache.lucene.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,34 +31,24 @@ public class PageService {
      * @param query 查询语句
      * @return
      */
-    public List<Page> query(String query){
-        List<IndexFile> indexFiles =indexFileDao.findAll();
+    public List<Page> query(String query,int page,int limit){
+        List<IndexFile> indexFiles =indexFileDao.selectList(null);
         Map<Document,Float> documents = new HashMap<>();
         for(IndexFile indexfile : indexFiles){
             documents.putAll(Querier.query(new File(indexfile.getFilepath()),query));
         }
         List<Map.Entry<Document,Float>> sortedDocuments =  new ArrayList<>(documents.entrySet());
         sortedDocuments.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-        List<Page> result = new ArrayList<>();
+        QueryWrapper<Page> queryWrapper = new QueryWrapper<>();
+        Set<String> processedFilePaths = new LinkedHashSet<>();
         for(Map.Entry<Document,Float> sortedDocument : sortedDocuments){
             Document doc = sortedDocument.getKey();
-            String filePath = doc.get("filePath");
-            Page page = pageDao.findByProcessedFilePath(filePath);
-            result.add(page);
+            processedFilePaths.add(doc.get("filePath"));
         }
-        return result;
+        queryWrapper.in("processed_filepath",processedFilePaths);
+        IPage<Page> pageIPage = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page,limit);
+        pageDao.selectPage(pageIPage,queryWrapper);
+        return pageIPage.getRecords();
     }
 
-    /**
-     * 转化为Json对象，主要发送给前端
-     * @param page page类对象
-     * @return Json对象
-     */
-    public JSONObject pageToJSONObject(Page page){
-        JSONObject object = new JSONObject();
-        object.put("url",page.getUrl());
-        object.put("title",page.getTitle());
-        object.put("description",page.getDescription());
-        return object;
-    }
 }

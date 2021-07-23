@@ -1,11 +1,12 @@
 package com.zhanghongshen.soo.controller;
 
-import com.alibaba.fastjson.JSONArray;
-import com.zhanghongshen.soo.entity.Page;
+import com.zhanghongshen.soo.pojo.VO.PageVO;
+import com.zhanghongshen.soo.pojo.entity.Page;
 import com.zhanghongshen.soo.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,18 +17,22 @@ import java.util.Map;
  */
 
 @RestController
+@RequestMapping("/page")
 public class PageController {
     @Autowired
     private PageService pageService;
 
-    @RequestMapping(value = "/search",method = RequestMethod.GET)
-    public JSONArray getSearchResult(@RequestParam Map<String,String> params) {
-        JSONArray jsonArray = new JSONArray();
-        List<Page> pages = pageService.query(params.get("searchContent"));
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public ResultBean<List<PageVO>> getSearchResult(@RequestParam Map<String,String> params) {
+        System.out.println(params);
+        String searchContent = params.get("searchContent");
+        int pageIndex = Integer.parseInt(params.get("pageIndex"));
+        int pageSize = Integer.parseInt(params.get("pageSize"));
+        List<Page> pages = pageService.query(searchContent,pageIndex,pageSize);
+        List<PageVO> data = new ArrayList<>();
         for(Page page : pages){
-            jsonArray.add(pageService.pageToJSONObject(page));
+            data.add(new PageVO(page.getUrl(),page.getTitle(),page.getDescription()));
         }
-        return jsonArray;
+        return new ResultBean<>(data);
     }
-
 }
